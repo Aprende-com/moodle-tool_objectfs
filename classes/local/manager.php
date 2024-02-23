@@ -32,6 +32,8 @@ defined('MOODLE_INTERNAL') || die();
 
 class manager {
 
+    private static $cloudfront_key = null;
+
     /**
      * @param $config
      */
@@ -232,11 +234,16 @@ class manager {
      */
     public static function parse_cloudfront_private_key($cloudfrontprivatekey) {
         global $CFG;
+        if(!is_null(self::$cloudfront_key)) {
+            return self::$cloudfront_key;
+        }
+
         $pemfile = $CFG->dataroot . '/objectfs/' . $cloudfrontprivatekey;
         if (file_exists($pemfile) && is_readable($pemfile)) {
             $cloudfrontprivatekey = 'file://' . $pemfile;
         }
-        return openssl_pkey_get_private($cloudfrontprivatekey);
+        self::$cloudfront_key = openssl_pkey_get_private($cloudfrontprivatekey);
+        return self::$cloudfront_key;
     }
 
     /**
